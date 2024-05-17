@@ -59,6 +59,15 @@ async def live(ctx):
     else:
         await ctx.send("No live matches are on at the moment.")
 
+@bot.command()
+async def sportsbooks(ctx):
+    list = []
+    for item in constants.sportbooks_list:
+        list.append(f"{item['label']} - *{item['status']}*")
+    output = "\n".join(list)
+    code_block = f"{output}"
+    await ctx.send(textwrap.dedent(code_block))
+
 #--- Start the bot ---
 def startBot():
     bot.run(get_token())
