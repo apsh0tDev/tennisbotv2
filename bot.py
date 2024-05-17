@@ -1,6 +1,7 @@
 #Discord imports and enviroment
 import discord
 import os
+import textwrap
 from dotenv import load_dotenv
 from discord.ext import commands
 from schedule import get_schedule
@@ -14,7 +15,7 @@ import constants
 load_dotenv()
 
 # branch variable, each branch has a different token, change to "DEV" or "PROD"
-current_branch = "DEV"
+current_branch = "PROD"
 intents = discord.Intents.default()
 intents.message_content = True
 bot = commands.Bot(command_prefix='!', intents=intents)
@@ -51,9 +52,12 @@ async def schedule(ctx):
 
 @bot.command()
 async def live(ctx):
-    await ctx.send("Getting live...")
     response = await get_live_events()
-    print(response)
+    if response != None:
+        message = textwrap.dedent(response)
+        await ctx.send(message)
+    else:
+        await ctx.send("No live matches are on at the moment.")
 
 #--- Start the bot ---
 def startBot():

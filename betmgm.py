@@ -61,7 +61,8 @@ async def main_parser(response):
                     if match_name not in matches_names:
                         await post_match(match=match)
                     else:
-                        await update_match(match=match)
+                        if match['stage'] == 'Live': 
+                            await update_match(match=match)
             
         except Exception as e:
             print("Error in BetMGM parser", e)
@@ -90,13 +91,31 @@ async def post_match(match):
     db.table("matches").insert(match_info).execute()
 
     #We get the scores into a different table, just posting the ones with "Live" status
-    scoreboard_info = {
-        
-    }
+    if match['stage'] == "Live":
+        scoreboard_info = {
+            "match_id" : match['id'],
+            "match_name" : match['name']['value'],
+            "current_period" : match['scoreboard']['period'],
+            "teamA" : remove_parentheses(match['participants'][0]['name']['value']) if len(match['participants']) > 0 else "Unknown",
+            "teamB" : remove_parentheses(match['participants'][1]['name']['value']) if len(match['participants']) > 1 else "Unknown",
+            "set_one_teamA_score": match['scoreboard']['setsValues']['player1'][0],
+            "set_one_teamB_score": match['scoreboard']['setsValues']['player2'][0],
+            "set_two_teamA_score": match['scoreboard']['setsValues']['player1'][1],
+            "set_two_teamB_score": match['scoreboard']['setsValues']['player2'][1],
+            "set_three_teamA_score": match['scoreboard']['setsValues']['player1'][2],
+            "set_three_teamB_score": match['scoreboard']['setsValues']['player2'][2],
+        }
+    
+        db.table("scoreboard").insert(scoreboard_info).execute()
 
 
 async def update_match(match):
     print(f"Updating match: {match['name']['value']}")
+    
+    print(match)
+
+    #db.table("scoreboard").update(score_data).match({'match_id': match['match_id'], 'match_name': match['match_name']}).execute()
+
 
 if __name__ == "__main__":
     try:
